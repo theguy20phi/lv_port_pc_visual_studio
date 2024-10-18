@@ -3545,6 +3545,7 @@
       <Filter>lvgl\src\widgets\win</Filter>
     </ClCompile>
     <ClCompile Include="LvglWindowsSimulator.cpp" />
+    <ClCompile Include="atum_logo_brain.c" />
   </ItemGroup>
   <ItemGroup>
     <None Include="$(MSBuildThisFileDirectory)..\LvglPlatform\freetype\.clang-format">

@@ -1224,7 +1224,6 @@
     <ClCompile Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\src\widgets\textarea\lv_textarea.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\src\widgets\tileview\lv_tileview.c" />
     <ClCompile Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\src\widgets\win\lv_win.c" />
-    <ClCompile Include="atum_logo_brain.c" />
     <ClCompile Include="LvglWindowsSimulator.cpp" />
   </ItemGroup>
   <ItemGroup>

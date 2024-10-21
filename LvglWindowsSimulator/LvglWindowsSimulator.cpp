@@ -88,34 +88,28 @@ int main()
 
     static lv_style_t style_bg;
     lv_style_init(&style_bg);
-    lv_style_set_bg_color(&style_bg, darkGrey);
+    lv_style_set_bg_color(&style_bg, grey);
     lv_style_set_bg_opa(&style_bg, LV_OPA_COVER);
     lv_style_set_border_opa(&style_bg, LV_OPA_COVER);
     lv_style_set_border_width(&style_bg, 10);
-    lv_style_set_border_color(&style_bg, grey);
+    lv_style_set_border_color(&style_bg, darkGrey);
 
 
     static lv_style_t style_title;
     lv_style_init(&style_title);
-    lv_style_set_text_color(&style_title, white);
+    lv_style_set_text_color(&style_title, black);
     lv_style_set_text_font(&style_title, &lv_font_montserrat_36);
     lv_style_set_text_letter_space(&style_title, -4);
-    lv_style_set_bg_color(&style_title, black);
+    lv_style_set_bg_color(&style_title, lightGrey);
     lv_style_set_bg_opa(&style_title, LV_OPA_COVER);
-    /*
-    lv_style_set_text_decor(&style_title, LV_TEXT_DECOR_UNDERLINE);
-    lv_style_set_radius(&style_title, 10);
-    lv_style_set_transform_width(&style_title, 10);
-    lv_style_set_transform_height(&style_title, -1);
-    lv_style_set_border_color(&style_title, lv_color_lighten(atuGreen, 50));
-    lv_style_set_border_width(&style_title, 3);
-    lv_style_set_border_opa(&style_title, LV_OPA_COVER);
-    lv_style_set_border_side(&style_title, static_cast<lv_border_side_t>(LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_RIGHT));
-    lv_style_set_shadow_opa(&style_title, LV_OPA_50);
-    lv_style_set_shadow_color(&style_title, lv_color_darken(atuGreen, 150));
-    lv_style_set_shadow_width(&style_title, 15);
-    lv_style_set_shadow_spread(&style_title, 5);
-    */
+
+    static lv_style_t style_return;
+    lv_style_init(&style_return);
+    lv_style_set_text_color(&style_return, black);
+    lv_style_set_text_font(&style_return, &lv_font_montserrat_36);
+    lv_style_set_text_letter_space(&style_return, -4);
+    lv_style_set_bg_color(&style_return, lightGrey);
+    lv_style_set_bg_opa(&style_return, LV_OPA_COVER);
 
 
 
@@ -125,7 +119,15 @@ int main()
     lv_obj_t* label{ lv_label_create(scr) };
     lv_label_set_text(label, "HOME");
     lv_obj_add_style(label, &style_title, 0);
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 50, 0);
+    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 5, 5);
+
+    lv_obj_t* return_button{ lv_button_create(scr) };
+    lv_obj_add_style(return_button, &style_return, 0);
+    lv_obj_align(return_button, LV_ALIGN_TOP_RIGHT, -5, 5);
+    lv_obj_t* return_label{ lv_label_create(return_button) };
+    lv_obj_add_style(return_label, &style_return, 0);
+    lv_label_set_text(return_label, LV_SYMBOL_NEW_LINE);
+    lv_obj_center(return_label);
 
 
     //lv_demo_widgets();

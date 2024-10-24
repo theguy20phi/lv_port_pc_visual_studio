@@ -102,6 +102,11 @@ int main()
     lv_style_set_text_letter_space(&style_title, -4);
     lv_style_set_bg_color(&style_title, lightGrey);
     lv_style_set_bg_opa(&style_title, LV_OPA_COVER);
+    lv_style_set_border_opa(&style_title, LV_OPA_COVER);
+    lv_style_set_border_side(&style_title, static_cast<lv_border_side_t>(LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_RIGHT));
+    lv_style_set_border_color(&style_title, white);
+    lv_style_set_border_width(&style_title, 2);
+    lv_style_set_radius(&style_title, 5);
 
     static lv_style_t style_return;
     lv_style_init(&style_return);
@@ -122,6 +127,7 @@ int main()
     lv_obj_align(label, LV_ALIGN_TOP_LEFT, 5, 5);
 
     lv_obj_t* return_button{ lv_button_create(scr) };
+    lv_obj_set_size(return_button, 150, 40);
     lv_obj_add_style(return_button, &style_return, 0);
     lv_obj_align(return_button, LV_ALIGN_TOP_RIGHT, -5, 5);
     lv_obj_t* return_label{ lv_label_create(return_button) };

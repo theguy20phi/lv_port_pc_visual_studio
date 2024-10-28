@@ -7,6 +7,11 @@
 #include "lvgl/demos/lv_demos.h"
 #include <string>
 #include <vector>
+#include <functional>
+#include <iostream>
+
+static lv_style_t style_button_idle;
+static lv_style_t style_button_pressed;
 
 struct GUISize {
     const int width;
@@ -23,15 +28,20 @@ lv_obj_t* createButton(lv_obj_t* scr,
     const std::string& text,
     const GUISize &size,
     const GUIPosition& position,
-    const std::vector<lv_style_t*>& idleStyles = {},
-    const std::vector<lv_style_t*>& pressedStyles = {}) {
+    const lv_event_cb_t callback = nullptr,
+    const std::vector<lv_style_t*>& extraIdleStyles = {},
+    const std::vector<lv_style_t*>& extraPressedStyles = {}) {
     lv_obj_t* button{ lv_button_create(scr) };
     lv_obj_set_size(button, size.width, size.height);
-    for(lv_style_t* style : idleStyles)
+    lv_obj_add_style(button, &style_button_idle, 0);
+    for(lv_style_t* style : extraIdleStyles)
         lv_obj_add_style(button, style, 0);
-    for (lv_style_t* style : pressedStyles)
+    lv_obj_add_style(button, &style_button_pressed, LV_STATE_PRESSED);
+    for (lv_style_t* style : extraPressedStyles)
         lv_obj_add_style(button, style, LV_STATE_PRESSED);
     lv_obj_align(button, position.align, position.x, position.y);
+
+    lv_obj_add_event_cb(button, callback, LV_EVENT_ALL, nullptr);
 
     lv_obj_t* label{ lv_label_create(button) };
     lv_label_set_text(label, text.c_str());
@@ -153,7 +163,6 @@ int main()
     lv_style_set_bg_color(&style_title, lightGrey);
     lv_style_set_bg_opa(&style_title, LV_OPA_COVER);
 
-    static lv_style_t style_button_idle;
     lv_style_init(&style_button_idle);
     lv_style_set_text_color(&style_button_idle, black);
     lv_style_set_text_font(&style_button_idle, &lv_font_montserrat_36);
@@ -162,64 +171,49 @@ int main()
     lv_style_set_bg_opa(&style_button_idle, LV_OPA_COVER);
     lv_style_set_shadow_opa(&style_button_idle, LV_OPA_TRANSP);
 
-    static lv_style_t style_button_pressed;
     lv_style_init(&style_button_pressed);
     lv_style_set_text_color(&style_button_pressed, white);
     lv_style_set_bg_color(&style_button_pressed, black);
-
-    static lv_style_t style_button_matrix;
-    lv_style_init(&style_button_matrix);
-    lv_style_set_bg_opa(&style_button_matrix, LV_OPA_TRANSP);
     
 
-    lv_obj_t* scr{ lv_screen_active() };
-    lv_obj_add_style(scr, &style_bg, 0);
+    lv_obj_t* homeScreen{ lv_screen_active() };
+    lv_obj_add_style(homeScreen, &style_bg, 0);
 
-    lv_obj_t* label{ lv_label_create(scr) };
-    lv_label_set_text(label, "HOME");
-    lv_obj_set_size(label, 250, 40);
-    lv_obj_add_style(label, &right_border, 0);
-    lv_obj_add_style(label, &style_title, 0);
-    lv_obj_align(label, LV_ALIGN_TOP_LEFT, 5, 5);
+    lv_obj_t* homeLabel{ lv_label_create(homeScreen) };
+    lv_label_set_text(homeLabel, "HOME");
+    lv_obj_set_size(homeLabel, 250, 40);
+    lv_obj_add_style(homeLabel, &right_border, 0);
+    lv_obj_add_style(homeLabel, &style_title, 0);
+    lv_obj_align(homeLabel, LV_ALIGN_TOP_LEFT, 5, 5);
 
-    createButton(scr,
+    createButton(homeScreen,
         LV_SYMBOL_NEW_LINE,
         { 150, 40 },
-        { -5, 5, LV_ALIGN_TOP_RIGHT },
-        { &left_border, &style_button_idle },
-        { &style_button_pressed }
+        { -5, 5, LV_ALIGN_TOP_RIGHT }
     );
 
-    createButton(scr,
+    createButton(homeScreen,
         "ROUTINE",
         { workingWidth - 20, 40 },
-        { 0, -140, LV_ALIGN_BOTTOM_MID },
-        { &style_button_idle },
-        { &style_button_pressed }
+        { 0, -140, LV_ALIGN_BOTTOM_MID }
     );
 
-    createButton(scr,
+    createButton(homeScreen,
         "LOG",
         { workingWidth - 20, 40 },
-        { 0, -95, LV_ALIGN_BOTTOM_MID },
-        { &style_button_idle },
-        { &style_button_pressed }
+        { 0, -95, LV_ALIGN_BOTTOM_MID }
     );
 
-    createButton(scr,
+    createButton(homeScreen,
         "GRAPH",
         { workingWidth - 20, 40 },
-        { 0, -50, LV_ALIGN_BOTTOM_MID },
-        { &style_button_idle },
-        { &style_button_pressed }
+        { 0, -50, LV_ALIGN_BOTTOM_MID }
     );
 
-    createButton(scr,
+    createButton(homeScreen,
         "MAP",
         { workingWidth - 20, 40 },
-        { 0, -5, LV_ALIGN_BOTTOM_MID },
-        { &style_button_idle },
-        { &style_button_pressed }
+        { 0, -5, LV_ALIGN_BOTTOM_MID }
     );
 
 

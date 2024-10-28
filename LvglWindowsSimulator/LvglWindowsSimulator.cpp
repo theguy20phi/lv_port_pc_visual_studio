@@ -10,8 +10,10 @@
 #include <functional>
 #include <iostream>
 
-static lv_style_t style_button_idle;
-static lv_style_t style_button_pressed;
+static lv_style_t styleButtonIdle;
+static lv_style_t styleButtonPressed;
+static lv_obj_t* homeScreen;
+static lv_obj_t* routinesScreen;
 
 struct GUISize {
     const int width;
@@ -24,31 +26,61 @@ struct GUIPosition {
     const lv_align_t align{ LV_ALIGN_TOP_LEFT };
 };
 
-lv_obj_t* createButton(lv_obj_t* scr,
+void addStyles(lv_obj_t* obj,
+    const std::vector<lv_style_t*>& styles,
+    const lv_style_selector_t selector = LV_STATE_DEFAULT) {
+    for (lv_style_t* style : styles)
+        lv_obj_add_style(obj, style, selector);
+}
+
+static void changeScreenCB(lv_event_t* event) {
+    void* userData{ lv_event_get_user_data(event) };
+    lv_obj_t* scr{ static_cast<lv_obj_t*>(userData) };
+    if (scr)
+        lv_screen_load(scr);
+}
+
+static lv_obj_t* createScreenChangeButton(lv_obj_t* currentScr,
     const std::string& text,
     const GUISize &size,
     const GUIPosition& position,
-    const lv_event_cb_t callback = nullptr,
+    lv_obj_t* nextScr = nullptr,
     const std::vector<lv_style_t*>& extraIdleStyles = {},
     const std::vector<lv_style_t*>& extraPressedStyles = {}) {
-    lv_obj_t* button{ lv_button_create(scr) };
+    // Create the button, size it, and place it.
+    lv_obj_t* button{ lv_button_create(currentScr) };
     lv_obj_set_size(button, size.width, size.height);
-    lv_obj_add_style(button, &style_button_idle, 0);
-    for(lv_style_t* style : extraIdleStyles)
-        lv_obj_add_style(button, style, 0);
-    lv_obj_add_style(button, &style_button_pressed, LV_STATE_PRESSED);
-    for (lv_style_t* style : extraPressedStyles)
-        lv_obj_add_style(button, style, LV_STATE_PRESSED);
     lv_obj_align(button, position.align, position.x, position.y);
 
-    lv_obj_add_event_cb(button, callback, LV_EVENT_ALL, nullptr);
-
+    // Add and place the text on the button. 
     lv_obj_t* label{ lv_label_create(button) };
     lv_label_set_text(label, text.c_str());
     lv_obj_center(label);
 
+    // Add screen change callback with next screen as a parameter. 
+    lv_obj_add_event_cb(button, changeScreenCB, LV_EVENT_CLICKED, static_cast<void*>(nextScr));
+
+    // Add styles. 
+    lv_obj_add_style(button, &styleButtonIdle, 0);
+    addStyles(button, extraIdleStyles);
+    lv_obj_add_style(button, &styleButtonPressed, LV_STATE_PRESSED);
+    addStyles(button, extraPressedStyles, LV_STATE_PRESSED);
+
     return button;
 };
+
+static lv_obj_t* createLabel(lv_obj_t* scr,
+    const std::string& text,
+    const GUISize& size,
+    const GUIPosition& position,
+    const std::vector<lv_style_t*>& styles = {}) {
+    lv_obj_t* label{ lv_label_create(scr) };
+    lv_label_set_text(label, text.c_str());
+    lv_obj_set_size(label, size.width, size.height);
+    addStyles(label, styles);
+    lv_obj_align(label, position.align, position.x, position.y);
+    return label;
+}
 
 int main()
 {
@@ -124,6 +156,11 @@ int main()
     static constexpr int bgBorderWidth{ 5 };
     static constexpr int workingWidth{ 480 - bgBorderWidth };
     static constexpr int workingHeight{ 240 - bgBorderWidth };
+    static constexpr int defaultHeight{ 40 };
+    static constexpr int defaultPadding{ bgBorderWidth };
+    static constexpr int fillWidth{ workingWidth - 4 * defaultPadding };
+    static constexpr int fillHeight{ workingHeight - defaultHeight - 4 * defaultPadding};
+    static constexpr int contentYOffset{ defaultHeight + 2 * defaultPadding };
     const lv_color_t black{ lv_color_hex(0x1f1f1f) };
     const lv_color_t darkGrey{ lv_color_hex(0x303030) };
     const lv_color_t grey{ lv_color_hex(0x454545) };
@@ -163,58 +200,98 @@ int main()
     lv_style_set_bg_color(&style_title, lightGrey);
     lv_style_set_bg_opa(&style_title, LV_OPA_COVER);
 
-    lv_style_init(&style_button_idle);
-    lv_style_set_text_color(&style_button_idle, black);
-    lv_style_set_text_font(&style_button_idle, &lv_font_montserrat_36);
-    lv_style_set_text_letter_space(&style_button_idle, -4);
-    lv_style_set_bg_color(&style_button_idle, lightGrey);
-    lv_style_set_bg_opa(&style_button_idle, LV_OPA_COVER);
-    lv_style_set_shadow_opa(&style_button_idle, LV_OPA_TRANSP);
+    lv_style_init(&styleButtonIdle);
+    lv_style_set_text_color(&styleButtonIdle, black);
+    lv_style_set_text_font(&styleButtonIdle, &lv_font_montserrat_36);
+    lv_style_set_text_letter_space(&styleButtonIdle, -4);
+    lv_style_set_bg_color(&styleButtonIdle, lightGrey);
+    lv_style_set_bg_opa(&styleButtonIdle, LV_OPA_COVER);
+    lv_style_set_shadow_opa(&styleButtonIdle, LV_OPA_TRANSP);
 
-    lv_style_init(&style_button_pressed);
-    lv_style_set_text_color(&style_button_pressed, white);
-    lv_style_set_bg_color(&style_button_pressed, black);
-    
+    lv_style_init(&styleButtonPressed);
+    lv_style_set_text_color(&styleButtonPressed, white);
+    lv_style_set_bg_color(&styleButtonPressed, black);
 
-    lv_obj_t* homeScreen{ lv_screen_active() };
+    // Create screens. 
+    homeScreen = lv_obj_create(nullptr);
     lv_obj_add_style(homeScreen, &style_bg, 0);
+    routinesScreen = lv_obj_create(nullptr);
+    lv_obj_add_style(routinesScreen, &style_bg, 0);
 
-    lv_obj_t* homeLabel{ lv_label_create(homeScreen) };
-    lv_label_set_text(homeLabel, "HOME");
-    lv_obj_set_size(homeLabel, 250, 40);
-    lv_obj_add_style(homeLabel, &right_border, 0);
-    lv_obj_add_style(homeLabel, &style_title, 0);
-    lv_obj_align(homeLabel, LV_ALIGN_TOP_LEFT, 5, 5);
+    // Home screen setup. 
+    createLabel(homeScreen, "HOME", { 250, defaultHeight }, { 5, 5 }, { &right_border, &style_title });
 
-    createButton(homeScreen,
+    createScreenChangeButton(homeScreen,
         LV_SYMBOL_NEW_LINE,
         { 150, 40 },
-        { -5, 5, LV_ALIGN_TOP_RIGHT }
+        { -5, 5, LV_ALIGN_TOP_RIGHT },
+        nullptr,
+        { &left_border }
     );
 
-    createButton(homeScreen,
+    createScreenChangeButton(homeScreen,
         "ROUTINE",
-        { workingWidth - 20, 40 },
-        { 0, -140, LV_ALIGN_BOTTOM_MID }
+        { fillWidth, defaultHeight },
+        { 0, contentYOffset, LV_ALIGN_TOP_MID },
+        routinesScreen
     );
 
-    createButton(homeScreen,
+    createScreenChangeButton(homeScreen,
         "LOG",
-        { workingWidth - 20, 40 },
-        { 0, -95, LV_ALIGN_BOTTOM_MID }
+        { fillWidth, defaultHeight },
+        { 0, contentYOffset + defaultHeight + defaultPadding, LV_ALIGN_TOP_MID }
     );
 
-    createButton(homeScreen,
+    createScreenChangeButton(homeScreen,
         "GRAPH",
-        { workingWidth - 20, 40 },
-        { 0, -50, LV_ALIGN_BOTTOM_MID }
+        { fillWidth, defaultHeight },
+        { 0, contentYOffset + 2 * (defaultHeight + defaultPadding), LV_ALIGN_TOP_MID }
     );
 
-    createButton(homeScreen,
+    createScreenChangeButton(homeScreen,
         "MAP",
-        { workingWidth - 20, 40 },
-        { 0, -5, LV_ALIGN_BOTTOM_MID }
+        { fillWidth, defaultHeight },
+        { 0, contentYOffset + 3 * (defaultHeight + defaultPadding), LV_ALIGN_TOP_MID }
     );
+
+    // Routines screen setup. 
+    createLabel(routinesScreen, "ROUTINES", { 250, defaultHeight }, { 5, 5 }, { &right_border, &style_title });
+
+    createScreenChangeButton(routinesScreen,
+        LV_SYMBOL_NEW_LINE,
+        { 150, 40 },
+        { -5, 5, LV_ALIGN_TOP_RIGHT },
+        homeScreen,
+        { &left_border }
+    );
+
+    lv_obj_t* routineSelections{ lv_dropdown_create(routinesScreen) };
+    lv_dropdown_set_options(routineSelections,
+        "None\n"
+        "Simple Left\n"
+        "Simple Right\n"
+        "WP Left\n"
+        "WP Right\n"
+        "Defensive Left\n"
+        "Defensive Right\n"
+        "Offensive Left"
+    );
+    lv_dropdown_add_option(routineSelections, "Placeholder", LV_DROPDOWN_POS_LAST);
+    lv_dropdown_add_option(routineSelections, "Testing", LV_DROPDOWN_POS_LAST);
+    lv_obj_align(routineSelections, LV_ALIGN_TOP_MID, 0, contentYOffset);
+    lv_obj_set_size(routineSelections, fillWidth, defaultHeight);
+    lv_obj_t* routineSelectionsList{ lv_dropdown_get_list(routineSelections) };
+    lv_obj_set_style_max_height(routineSelectionsList, fillHeight - defaultHeight, LV_STATE_DEFAULT);
+    lv_obj_add_style(routineSelections, &styleButtonIdle, LV_STATE_DEFAULT);
+    lv_obj_add_style(routineSelections, &styleButtonPressed, LV_STATE_PRESSED);
+    lv_obj_add_style(routineSelectionsList, &styleButtonIdle, LV_STATE_DEFAULT);
+    lv_obj_add_style(routineSelectionsList, &styleButtonPressed, LV_STATE_PRESSED);
+
+
+
+
+    // Load starting screen.
+    lv_scr_load(homeScreen);
 
 
     //lv_demo_widgets();

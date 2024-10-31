@@ -72,7 +72,7 @@ static lv_obj_t* createScreenChangeButton(lv_obj_t* currentScr,
     return button;
 };
 
-static lv_obj_t* createHeaderLabel(lv_obj_t* scr,
+static lv_obj_t* createLabel(lv_obj_t* scr,
     const std::string& text,
     const GUISize& size,
     const GUIPosition& position,
@@ -241,7 +241,7 @@ int main()
     lv_obj_add_style(mapScreen, &styleBG, 0);
 
     // Home screen setup. 
-    createHeaderLabel(homeScreen, "HOME", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    createLabel(homeScreen, "HOME", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(homeScreen,
         LV_SYMBOL_NEW_LINE,
@@ -280,7 +280,7 @@ int main()
     );
 
     // Routines screen setup. 
-    createHeaderLabel(routinesScreen, "ROUTINES", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    createLabel(routinesScreen, "ROUTINES", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(routinesScreen,
         LV_SYMBOL_NEW_LINE,
@@ -321,7 +321,7 @@ int main()
     lv_obj_set_style_bg_color(colorSwitch, lv_color_hex(0x0000FF), LV_PART_INDICATOR | LV_STATE_CHECKED);
 
     // Logger screen setup. 
-    createHeaderLabel(logScreen, "LOG", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    createLabel(logScreen, "LOG", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(logScreen,
         LV_SYMBOL_NEW_LINE,
@@ -347,8 +347,19 @@ int main()
     lv_obj_set_style_bg_color(logSwitch, white, LV_PART_INDICATOR | LV_STATE_CHECKED);
     lv_obj_set_style_bg_color(logSwitch, black, LV_PART_KNOB | LV_STATE_CHECKED);
 
+
+    lv_obj_t* logTextArea{ lv_textarea_create(logScreen) };
+    lv_obj_align(logTextArea, LV_ALIGN_TOP_MID, 0, contentYOffset);
+    lv_obj_set_size(logTextArea, fillWidth, fillHeight - defaultHeight - defaultPadding);
+    lv_obj_set_style_bg_color(logTextArea, lightGrey, LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_opa(logTextArea, LV_OPA_COVER, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_color(logTextArea, black, LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(logTextArea, white, LV_STATE_DEFAULT | LV_PART_SCROLLBAR);
+    lv_textarea_set_max_length(logTextArea, 1000);
+
+
     // Grapher screen setup. 
-    createHeaderLabel(graphScreen, "GRAPH", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    createLabel(graphScreen, "GRAPH", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(graphScreen,
         LV_SYMBOL_NEW_LINE,
@@ -359,7 +370,7 @@ int main()
     );
 
     // Map screen setup. 
-    createHeaderLabel(mapScreen, "MAP", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    createLabel(mapScreen, "MAP", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(mapScreen,
         LV_SYMBOL_NEW_LINE,

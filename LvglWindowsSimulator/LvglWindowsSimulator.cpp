@@ -42,7 +42,7 @@ static void changeScreenCB(lv_event_t* event) {
 
 static lv_obj_t* createScreenChangeButton(lv_obj_t* currentScr,
     const std::string& text,
-    const GUISize &size,
+    const GUISize& size,
     const GUIPosition& position,
     lv_obj_t* nextScr = nullptr,
     const std::vector<lv_style_t*>& extraIdleStyles = {},
@@ -159,46 +159,46 @@ int main()
     static constexpr int defaultHeight{ 40 };
     static constexpr int defaultPadding{ bgBorderWidth };
     static constexpr int fillWidth{ workingWidth - 4 * defaultPadding };
-    static constexpr int fillHeight{ workingHeight - defaultHeight - 4 * defaultPadding};
+    static constexpr int fillHeight{ workingHeight - defaultHeight - 4 * defaultPadding };
     static constexpr int contentYOffset{ defaultHeight + 2 * defaultPadding };
     const lv_color_t black{ lv_color_hex(0x1f1f1f) };
     const lv_color_t darkGrey{ lv_color_hex(0x303030) };
     const lv_color_t grey{ lv_color_hex(0x454545) };
     const lv_color_t lightGrey{ lv_color_hex(0xbebebe) };
-    const lv_color_t white{ lv_color_white()};
-    
-    
+    const lv_color_t white{ lv_color_white() };
 
-    static lv_style_t style_bg;
-    lv_style_init(&style_bg);
-    lv_style_set_bg_color(&style_bg, grey);
-    lv_style_set_bg_opa(&style_bg, LV_OPA_COVER);
-    lv_style_set_border_opa(&style_bg, LV_OPA_COVER);
-    lv_style_set_border_width(&style_bg, bgBorderWidth);
-    lv_style_set_border_color(&style_bg, darkGrey);
 
-    static lv_style_t left_border;
-    lv_style_init(&left_border);
-    lv_style_set_border_side(&left_border, static_cast<lv_border_side_t>(LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_LEFT));
-    lv_style_set_border_color(&left_border, white);
-    lv_style_set_border_width(&left_border, 2);
-    lv_style_set_radius(&left_border, 5);
 
-    static lv_style_t right_border;
-    lv_style_init(&right_border);
-    lv_style_set_border_side(&right_border, static_cast<lv_border_side_t>(LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_RIGHT));
-    lv_style_set_border_color(&right_border, white);
-    lv_style_set_border_width(&right_border, 2);
-    lv_style_set_radius(&right_border, 5);
+    static lv_style_t styleBG;
+    lv_style_init(&styleBG);
+    lv_style_set_bg_color(&styleBG, grey);
+    lv_style_set_bg_opa(&styleBG, LV_OPA_COVER);
+    lv_style_set_border_opa(&styleBG, LV_OPA_COVER);
+    lv_style_set_border_width(&styleBG, bgBorderWidth);
+    lv_style_set_border_color(&styleBG, darkGrey);
 
-    static lv_style_t style_title;
-    lv_style_init(&style_title);
-    lv_style_set_text_color(&style_title, black);
-    lv_style_set_text_font(&style_title, &lv_font_montserrat_36);
-    lv_style_set_text_align(&style_title, LV_TEXT_ALIGN_CENTER);
-    lv_style_set_text_letter_space(&style_title, -4);
-    lv_style_set_bg_color(&style_title, lightGrey);
-    lv_style_set_bg_opa(&style_title, LV_OPA_COVER);
+    static lv_style_t leftBorder;
+    lv_style_init(&leftBorder);
+    lv_style_set_border_side(&leftBorder, static_cast<lv_border_side_t>(LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_LEFT));
+    lv_style_set_border_color(&leftBorder, white);
+    lv_style_set_border_width(&leftBorder, 2);
+    lv_style_set_radius(&leftBorder, 5);
+
+    static lv_style_t rightBorder;
+    lv_style_init(&rightBorder);
+    lv_style_set_border_side(&rightBorder, static_cast<lv_border_side_t>(LV_BORDER_SIDE_BOTTOM | LV_BORDER_SIDE_RIGHT));
+    lv_style_set_border_color(&rightBorder, white);
+    lv_style_set_border_width(&rightBorder, 2);
+    lv_style_set_radius(&rightBorder, 5);
+
+    static lv_style_t styleTitle;
+    lv_style_init(&styleTitle);
+    lv_style_set_text_color(&styleTitle, black);
+    lv_style_set_text_font(&styleTitle, &lv_font_montserrat_36);
+    lv_style_set_text_align(&styleTitle, LV_TEXT_ALIGN_CENTER);
+    lv_style_set_text_letter_space(&styleTitle, -4);
+    lv_style_set_bg_color(&styleTitle, lightGrey);
+    lv_style_set_bg_opa(&styleTitle, LV_OPA_COVER);
 
     lv_style_init(&styleButtonIdle);
     lv_style_set_text_color(&styleButtonIdle, black);
@@ -212,21 +212,34 @@ int main()
     lv_style_set_text_color(&styleButtonPressed, white);
     lv_style_set_bg_color(&styleButtonPressed, black);
 
+    static lv_style_t styleDropDownIdle;
+    lv_style_init(&styleDropDownIdle);
+    lv_style_set_text_color(&styleDropDownIdle, black);
+    lv_style_set_text_font(&styleDropDownIdle, &lv_font_montserrat_20);
+    lv_style_set_text_align(&styleDropDownIdle, LV_TEXT_ALIGN_CENTER);
+    lv_style_set_bg_color(&styleDropDownIdle, lightGrey);
+    lv_style_set_bg_opa(&styleDropDownIdle, LV_OPA_COVER);
+
+    static lv_style_t styleDropDownPressed;
+    lv_style_init(&styleDropDownPressed);
+    lv_style_set_text_color(&styleDropDownPressed, white);
+    lv_style_set_bg_color(&styleDropDownPressed, black);
+
     // Create screens. 
     homeScreen = lv_obj_create(nullptr);
-    lv_obj_add_style(homeScreen, &style_bg, 0);
+    lv_obj_add_style(homeScreen, &styleBG, 0);
     routinesScreen = lv_obj_create(nullptr);
-    lv_obj_add_style(routinesScreen, &style_bg, 0);
+    lv_obj_add_style(routinesScreen, &styleBG, 0);
 
     // Home screen setup. 
-    createLabel(homeScreen, "HOME", { 250, defaultHeight }, { 5, 5 }, { &right_border, &style_title });
+    createLabel(homeScreen, "HOME", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(homeScreen,
         LV_SYMBOL_NEW_LINE,
         { 150, 40 },
         { -5, 5, LV_ALIGN_TOP_RIGHT },
         nullptr,
-        { &left_border }
+        { &leftBorder }
     );
 
     createScreenChangeButton(homeScreen,
@@ -255,14 +268,14 @@ int main()
     );
 
     // Routines screen setup. 
-    createLabel(routinesScreen, "ROUTINES", { 250, defaultHeight }, { 5, 5 }, { &right_border, &style_title });
+    createLabel(routinesScreen, "ROUTINES", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(routinesScreen,
         LV_SYMBOL_NEW_LINE,
         { 150, 40 },
         { -5, 5, LV_ALIGN_TOP_RIGHT },
         homeScreen,
-        { &left_border }
+        { &leftBorder }
     );
 
     lv_obj_t* routineSelections{ lv_dropdown_create(routinesScreen) };
@@ -282,10 +295,17 @@ int main()
     lv_obj_set_size(routineSelections, fillWidth, defaultHeight);
     lv_obj_t* routineSelectionsList{ lv_dropdown_get_list(routineSelections) };
     lv_obj_set_style_max_height(routineSelectionsList, fillHeight - defaultHeight, LV_STATE_DEFAULT);
-    lv_obj_add_style(routineSelections, &styleButtonIdle, LV_STATE_DEFAULT);
-    lv_obj_add_style(routineSelections, &styleButtonPressed, LV_STATE_PRESSED);
-    lv_obj_add_style(routineSelectionsList, &styleButtonIdle, LV_STATE_DEFAULT);
-    lv_obj_add_style(routineSelectionsList, &styleButtonPressed, LV_STATE_PRESSED);
+    lv_obj_add_style(routineSelections, &styleDropDownIdle, LV_STATE_DEFAULT);
+    lv_obj_add_style(routineSelections, &styleDropDownPressed, LV_STATE_PRESSED);
+    lv_obj_add_style(routineSelectionsList, &styleDropDownIdle, LV_STATE_DEFAULT);
+    lv_obj_add_style(routineSelectionsList, &styleDropDownPressed, LV_PART_SELECTED | LV_STATE_PRESSED);
+    lv_obj_set_style_bg_color(routineSelectionsList, darkGrey, LV_PART_SELECTED | LV_STATE_CHECKED);
+
+    lv_obj_t* colorSwitch{ lv_switch_create(routinesScreen) };
+    lv_obj_set_size(colorSwitch, fillWidth, 3 * defaultHeight);
+    lv_obj_align(colorSwitch, LV_ALIGN_BOTTOM_MID, 0, -defaultPadding);
+    lv_obj_set_style_bg_color(colorSwitch, lv_color_hex(0xFF0000), LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(colorSwitch, lv_color_hex(0x0000FF), LV_PART_INDICATOR | LV_STATE_CHECKED);
 
 
 

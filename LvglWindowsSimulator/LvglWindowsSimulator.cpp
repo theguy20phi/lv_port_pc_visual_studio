@@ -10,6 +10,8 @@
 #include <functional>
 #include <iostream>
 
+static constexpr int screenWidth{ 480 };
+static constexpr int screenHeight{ 240 };
 static lv_style_t styleButtonIdle;
 static lv_style_t styleButtonPressed;
 static lv_obj_t* homeScreen;
@@ -17,6 +19,8 @@ static lv_obj_t* routinesScreen;
 static lv_obj_t* logScreen;
 static lv_obj_t* graphScreen;
 static lv_obj_t* mapScreen;
+static lv_obj_t* logSwitch;
+static lv_obj_t* logTextArea;
 
 struct GUISize {
     const int width;
@@ -105,8 +109,8 @@ int main()
     bool simulator_mode = true;
     lv_display_t* display = lv_windows_create_display(
         L"LVGL Windows Simulator Display 1",
-        480,
-        240,
+        screenWidth,
+        screenHeight,
         zoom_level,
         allow_dpi_override,
         simulator_mode);
@@ -157,8 +161,8 @@ int main()
     }
 
     static constexpr int bgBorderWidth{ 5 };
-    static constexpr int workingWidth{ 480 - bgBorderWidth };
-    static constexpr int workingHeight{ 240 - bgBorderWidth };
+    static constexpr int workingWidth{ screenWidth - bgBorderWidth };
+    static constexpr int workingHeight{ screenHeight - bgBorderWidth };
     static constexpr int defaultHeight{ 40 };
     static constexpr int defaultPadding{ bgBorderWidth };
     static constexpr int fillWidth{ workingWidth - 4 * defaultPadding };
@@ -168,6 +172,8 @@ int main()
     const lv_color_t darkGrey{ lv_color_hex(0x303030) };
     const lv_color_t grey{ lv_color_hex(0x454545) };
     const lv_color_t lightGrey{ lv_color_hex(0xbebebe) };
+    const lv_color_t red{ lv_color_hex(0xFF0000) };
+    const lv_color_t blue{ lv_color_hex(0x0000FF) };
     const lv_color_t white{ lv_color_white() };
 
 
@@ -241,12 +247,12 @@ int main()
     lv_obj_add_style(mapScreen, &styleBG, 0);
 
     // Home screen setup. 
-    createLabel(homeScreen, "HOME", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    createLabel(homeScreen, "HOME", { 250, defaultHeight }, { defaultPadding, defaultPadding }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(homeScreen,
         LV_SYMBOL_NEW_LINE,
-        { 150, 40 },
-        { -5, 5, LV_ALIGN_TOP_RIGHT },
+        { 150, defaultHeight },
+        { -defaultPadding, defaultPadding, LV_ALIGN_TOP_RIGHT },
         nullptr,
         { &leftBorder }
     );
@@ -280,12 +286,12 @@ int main()
     );
 
     // Routines screen setup. 
-    createLabel(routinesScreen, "ROUTINES", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    createLabel(routinesScreen, "ROUTINES", { 250, defaultHeight }, { defaultPadding, defaultPadding }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(routinesScreen,
         LV_SYMBOL_NEW_LINE,
-        { 150, 40 },
-        { -5, 5, LV_ALIGN_TOP_RIGHT },
+        { 150, defaultHeight },
+        { -defaultPadding, defaultPadding, LV_ALIGN_TOP_RIGHT },
         homeScreen,
         { &leftBorder }
     );
@@ -316,17 +322,17 @@ int main()
     lv_obj_t* colorSwitch{ lv_switch_create(routinesScreen) };
     lv_obj_set_size(colorSwitch, fillWidth, 3 * defaultHeight);
     lv_obj_align(colorSwitch, LV_ALIGN_BOTTOM_MID, 0, -defaultPadding);
-    lv_obj_set_style_bg_color(colorSwitch, lv_color_hex(0xFF0000), LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(colorSwitch, red, LV_STATE_DEFAULT);
     lv_obj_set_style_bg_color(colorSwitch, white, LV_PART_KNOB);
-    lv_obj_set_style_bg_color(colorSwitch, lv_color_hex(0x0000FF), LV_PART_INDICATOR | LV_STATE_CHECKED);
+    lv_obj_set_style_bg_color(colorSwitch, blue, LV_PART_INDICATOR | LV_STATE_CHECKED);
 
     // Logger screen setup. 
-    createLabel(logScreen, "LOG", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    createLabel(logScreen, "LOG", { 250, defaultHeight }, { defaultPadding, defaultPadding }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(logScreen,
         LV_SYMBOL_NEW_LINE,
-        { 150, 40 },
-        { -5, 5, LV_ALIGN_TOP_RIGHT },
+        { 150, defaultHeight },
+        { -defaultPadding, defaultPadding, LV_ALIGN_TOP_RIGHT },
         homeScreen,
         { &leftBorder }
     );
@@ -338,7 +344,7 @@ int main()
     lv_obj_set_style_text_color(logEnabledLabel, white, LV_STATE_DEFAULT);
     lv_obj_set_style_text_font(logEnabledLabel, &lv_font_montserrat_18, LV_STATE_DEFAULT);
 
-    lv_obj_t* logSwitch{ lv_switch_create(logScreen) };
+    logSwitch = lv_switch_create(logScreen);
     lv_obj_set_size(logSwitch, 100, defaultHeight);
     lv_obj_add_state(logSwitch, LV_STATE_CHECKED);
     lv_obj_align(logSwitch, LV_ALIGN_BOTTOM_RIGHT, -defaultPadding, -defaultPadding);
@@ -348,7 +354,7 @@ int main()
     lv_obj_set_style_bg_color(logSwitch, black, LV_PART_KNOB | LV_STATE_CHECKED);
 
 
-    lv_obj_t* logTextArea{ lv_textarea_create(logScreen) };
+    logTextArea = lv_textarea_create(logScreen);
     lv_obj_align(logTextArea, LV_ALIGN_TOP_MID, 0, contentYOffset);
     lv_obj_set_size(logTextArea, fillWidth, fillHeight - defaultHeight - defaultPadding);
     lv_obj_set_style_bg_color(logTextArea, lightGrey, LV_STATE_DEFAULT);
@@ -359,26 +365,41 @@ int main()
 
 
     // Grapher screen setup. 
-    createLabel(graphScreen, "GRAPH", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    createLabel(graphScreen, "GRAPH", { 250, defaultHeight }, { defaultPadding, defaultPadding }, { &rightBorder, &styleTitle });
 
     createScreenChangeButton(graphScreen,
         LV_SYMBOL_NEW_LINE,
-        { 150, 40 },
-        { -5, 5, LV_ALIGN_TOP_RIGHT },
+        { 150, defaultHeight },
+        { -defaultPadding, defaultPadding, LV_ALIGN_TOP_RIGHT },
         homeScreen,
         { &leftBorder }
     );
 
     // Map screen setup. 
-    createLabel(mapScreen, "MAP", { 250, defaultHeight }, { 5, 5 }, { &rightBorder, &styleTitle });
+    lv_obj_t* mapLabel{ createLabel(mapScreen, "MAP", { 150, defaultHeight }, { -6 * defaultPadding, -70, LV_ALIGN_BOTTOM_RIGHT }, { &leftBorder, &styleTitle }) };
+    lv_obj_set_style_border_side(mapLabel, static_cast<lv_border_side_t>(LV_BORDER_SIDE_TOP | LV_BORDER_SIDE_LEFT), LV_STATE_DEFAULT);
 
     createScreenChangeButton(mapScreen,
         LV_SYMBOL_NEW_LINE,
-        { 150, 40 },
-        { -5, 5, LV_ALIGN_TOP_RIGHT },
+        { 150, defaultHeight },
+        { -6 * defaultPadding, 70, LV_ALIGN_TOP_RIGHT },
         homeScreen,
         { &leftBorder }
     );
+
+    lv_obj_t* mapChart{ lv_chart_create(mapScreen) };
+    lv_chart_set_type(mapChart, LV_CHART_TYPE_SCATTER);
+    static const int mapChartSize{ screenHeight - 4 * defaultPadding };
+    lv_obj_set_size(mapChart, mapChartSize, mapChartSize);
+    lv_obj_align(mapChart, LV_ALIGN_TOP_LEFT, 6 * defaultPadding, defaultPadding);
+    lv_chart_set_range(mapChart, LV_CHART_AXIS_PRIMARY_X, -1200, 1200);
+    lv_chart_set_range(mapChart, LV_CHART_AXIS_PRIMARY_Y, -1200, 1200);
+
+    lv_chart_series_t* redMapSeries{ lv_chart_add_series(mapChart, red, LV_CHART_AXIS_PRIMARY_Y) };
+    lv_chart_set_next_value2(mapChart, redMapSeries, lv_rand(-1200, 1200), lv_rand(-1200, 1200));
+    lv_chart_set_next_value2(mapChart, redMapSeries, lv_rand(-1200, 1200), lv_rand(-1200, 1200));
+    lv_chart_set_next_value2(mapChart, redMapSeries, lv_rand(-1200, 1200), lv_rand(-1200, 1200));
+    lv_chart_set_next_value2(mapChart, redMapSeries, lv_rand(-1200, 1200), lv_rand(-1200, 1200));
 
     // Load starting screen.
     lv_scr_load(homeScreen);

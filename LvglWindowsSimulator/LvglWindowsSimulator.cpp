@@ -173,6 +173,7 @@ int main()
     const lv_color_t grey{ lv_color_hex(0x454545) };
     const lv_color_t lightGrey{ lv_color_hex(0xbebebe) };
     const lv_color_t red{ lv_color_hex(0xFF0000) };
+    const lv_color_t green{ lv_color_hex(0x00FF00) };
     const lv_color_t blue{ lv_color_hex(0x0000FF) };
     const lv_color_t white{ lv_color_white() };
 
@@ -233,6 +234,11 @@ int main()
     lv_style_init(&styleDropDownPressed);
     lv_style_set_text_color(&styleDropDownPressed, white);
     lv_style_set_bg_color(&styleDropDownPressed, black);
+
+    static lv_style_t styleChart;
+    lv_style_init(&styleChart);
+    lv_style_set_bg_color(&styleChart, black);
+
 
     // Create screens. 
     homeScreen = lv_obj_create(nullptr);
@@ -375,6 +381,21 @@ int main()
         { &leftBorder }
     );
 
+    lv_obj_t* graphChart{ lv_chart_create(graphScreen) };
+    lv_chart_set_type(graphChart, LV_CHART_TYPE_LINE);
+    lv_obj_set_size(graphChart, fillWidth, fillHeight);
+    lv_obj_align(graphChart, LV_ALIGN_TOP_MID, 0, contentYOffset);
+    lv_chart_set_range(graphChart, LV_CHART_AXIS_PRIMARY_Y, -1000, 1000);
+    lv_chart_set_div_line_count(graphChart, 9, 18);
+    lv_obj_add_style(graphChart, &styleChart, LV_PART_MAIN | LV_STATE_DEFAULT);
+
+    lv_chart_series_t* redGraphSeries{ lv_chart_add_series(graphChart, red, LV_CHART_AXIS_PRIMARY_Y) };
+    lv_chart_set_next_value(graphChart, redGraphSeries, 200);
+    lv_chart_set_next_value(graphChart, redGraphSeries, 400);
+    lv_chart_set_next_value(graphChart, redGraphSeries, 600);
+    lv_chart_set_next_value(graphChart, redGraphSeries, 800);
+    lv_chart_set_next_value(graphChart, redGraphSeries, 1000);
+
     // Map screen setup. 
     lv_obj_t* mapLabel{ createLabel(mapScreen, "MAP", { 150, defaultHeight }, { -6 * defaultPadding, -70, LV_ALIGN_BOTTOM_RIGHT }, { &leftBorder, &styleTitle }) };
     lv_obj_set_style_border_side(mapLabel, static_cast<lv_border_side_t>(LV_BORDER_SIDE_TOP | LV_BORDER_SIDE_LEFT), LV_STATE_DEFAULT);
@@ -394,12 +415,22 @@ int main()
     lv_obj_align(mapChart, LV_ALIGN_TOP_LEFT, 6 * defaultPadding, defaultPadding);
     lv_chart_set_range(mapChart, LV_CHART_AXIS_PRIMARY_X, -1200, 1200);
     lv_chart_set_range(mapChart, LV_CHART_AXIS_PRIMARY_Y, -1200, 1200);
+    lv_chart_set_div_line_count(mapChart, 9, 9);
+    lv_obj_set_style_line_width(mapChart, 0, LV_PART_ITEMS);
+    lv_obj_add_style(mapChart, &styleChart, LV_PART_MAIN | LV_STATE_DEFAULT);
 
     lv_chart_series_t* redMapSeries{ lv_chart_add_series(mapChart, red, LV_CHART_AXIS_PRIMARY_Y) };
-    lv_chart_set_next_value2(mapChart, redMapSeries, lv_rand(-1200, 1200), lv_rand(-1200, 1200));
-    lv_chart_set_next_value2(mapChart, redMapSeries, lv_rand(-1200, 1200), lv_rand(-1200, 1200));
-    lv_chart_set_next_value2(mapChart, redMapSeries, lv_rand(-1200, 1200), lv_rand(-1200, 1200));
-    lv_chart_set_next_value2(mapChart, redMapSeries, lv_rand(-1200, 1200), lv_rand(-1200, 1200));
+    lv_chart_set_next_value2(mapChart, redMapSeries, 300, 300);
+    lv_chart_set_next_value2(mapChart, redMapSeries, 600, 600);
+    lv_chart_set_next_value2(mapChart, redMapSeries, 900, 900);
+    lv_chart_set_next_value2(mapChart, redMapSeries, 1200, 1200);
+
+
+    lv_chart_series_t* greenMapSeries{ lv_chart_add_series(mapChart, green, LV_CHART_AXIS_PRIMARY_Y) };
+    lv_chart_set_next_value2(mapChart, greenMapSeries, -300, 300);
+    lv_chart_set_next_value2(mapChart, greenMapSeries, -600, 600);
+    lv_chart_set_next_value2(mapChart, greenMapSeries, -900, 900);
+    lv_chart_set_next_value2(mapChart, greenMapSeries, -1200, 1200);
 
     // Load starting screen.
     lv_scr_load(homeScreen);

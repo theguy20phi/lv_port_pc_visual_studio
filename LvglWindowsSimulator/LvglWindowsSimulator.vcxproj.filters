@@ -11306,6 +11306,7 @@
       <Filter>lvgl\zephyr</Filter>
     </None>
     <None Include="freetype.props" />
+    <None Include="..\..\..\..\Desktop\atum-logo.bin" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="freetype">

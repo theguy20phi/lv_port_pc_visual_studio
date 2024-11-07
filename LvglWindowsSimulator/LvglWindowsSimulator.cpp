@@ -7,13 +7,14 @@
 #include "lvgl/demos/lv_demos.h"
 #include <string>
 #include <vector>
-#include <functional>
 #include <iostream>
 
 static constexpr int screenWidth{ 480 };
 static constexpr int screenHeight{ 240 };
 static lv_style_t styleButtonIdle;
 static lv_style_t styleButtonPressed;
+static lv_obj_t* loadingScreen;
+static lv_obj_t* mainMenuScreen;
 static lv_obj_t* homeScreen;
 static lv_obj_t* routinesScreen;
 static lv_obj_t* logScreen;
@@ -240,9 +241,14 @@ int main()
     lv_style_set_bg_color(&styleChart, black);
 
 
-    // Create screens. 
+    // Create screens.
+    loadingScreen = lv_obj_create(nullptr);
+    lv_obj_set_style_bg_color(loadingScreen, black, LV_PART_MAIN);
+    mainMenuScreen = lv_obj_create(nullptr);
+    lv_obj_add_style(mainMenuScreen, &styleBG, 0);
     homeScreen = lv_obj_create(nullptr);
-    lv_obj_add_style(homeScreen, &styleBG, 0);
+    lv_obj_set_style_bg_color(homeScreen, black, LV_PART_MAIN);
+    lv_obj_add_event_cb(homeScreen, changeScreenCB, LV_EVENT_CLICKED, static_cast<void*>(mainMenuScreen));
     routinesScreen = lv_obj_create(nullptr);
     lv_obj_add_style(routinesScreen, &styleBG, 0);
     logScreen = lv_obj_create(nullptr);
@@ -252,39 +258,64 @@ int main()
     mapScreen = lv_obj_create(nullptr);
     lv_obj_add_style(mapScreen, &styleBG, 0);
 
-    // Home screen setup. 
-    createLabel(homeScreen, "HOME", { 250, defaultHeight }, { defaultPadding, defaultPadding }, { &rightBorder, &styleTitle });
+    // Loading screen setup.
+    lv_obj_t* loadingLabel{ lv_label_create(loadingScreen) };
+    lv_label_set_text(loadingLabel, "LOADING!   DO NOT TOUCH!");
+    lv_obj_center(loadingLabel);
+    lv_obj_set_width(loadingLabel, screenWidth);
+    lv_label_set_long_mode(loadingLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);
+    lv_obj_set_style_text_color(loadingLabel, white, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(loadingLabel, &lv_font_montserrat_48, LV_STATE_DEFAULT);
 
-    createScreenChangeButton(homeScreen,
+
+    // Home screen setup.
+    createLabel(homeScreen, "HOME", { 250, defaultHeight }, { defaultPadding, defaultPadding }, { &rightBorder, &styleTitle });
+    lv_obj_t* atumLogo = lv_image_create(homeScreen);
+    lv_img_set_src(atumLogo, "C:/Users/brade/Desktop/atum.bin");
+    lv_obj_set_style_opa(atumLogo, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_center(atumLogo);
+    lv_obj_set_size(atumLogo, screenWidth, screenHeight);
+
+    lv_obj_t* clickAnywhereLabel{ lv_label_create(homeScreen) };
+    lv_label_set_text(clickAnywhereLabel, "Click anywhere to continue.");
+    lv_obj_center(clickAnywhereLabel);
+    lv_obj_align(clickAnywhereLabel, LV_ALIGN_BOTTOM_MID, 0, -2 * defaultPadding);
+    lv_obj_set_style_text_color(clickAnywhereLabel, white, LV_STATE_DEFAULT);
+    lv_obj_set_style_text_font(clickAnywhereLabel, &lv_font_montserrat_12, LV_STATE_DEFAULT);
+
+    // Main menu screen setup.
+    createLabel(mainMenuScreen, "MAIN MENU", { 250, defaultHeight }, { defaultPadding, defaultPadding }, { &rightBorder, &styleTitle });
+
+    createScreenChangeButton(mainMenuScreen,
         LV_SYMBOL_NEW_LINE,
         { 150, defaultHeight },
         { -defaultPadding, defaultPadding, LV_ALIGN_TOP_RIGHT },
-        nullptr,
+        homeScreen,
         { &leftBorder }
     );
 
-    createScreenChangeButton(homeScreen,
+    createScreenChangeButton(mainMenuScreen,
         "ROUTINE",
         { fillWidth, defaultHeight },
         { 0, contentYOffset, LV_ALIGN_TOP_MID },
         routinesScreen
     );
 
-    createScreenChangeButton(homeScreen,
+    createScreenChangeButton(mainMenuScreen,
         "LOG",
         { fillWidth, defaultHeight },
         { 0, contentYOffset + defaultHeight + defaultPadding, LV_ALIGN_TOP_MID },
         logScreen
     );
 
-    createScreenChangeButton(homeScreen,
+    createScreenChangeButton(mainMenuScreen,
         "GRAPH",
         { fillWidth, defaultHeight },
         { 0, contentYOffset + 2 * (defaultHeight + defaultPadding), LV_ALIGN_TOP_MID },
         graphScreen
     );
 
-    createScreenChangeButton(homeScreen,
+    createScreenChangeButton(mainMenuScreen,
         "MAP",
         { fillWidth, defaultHeight },
         { 0, contentYOffset + 3 * (defaultHeight + defaultPadding), LV_ALIGN_TOP_MID },
@@ -298,7 +329,7 @@ int main()
         LV_SYMBOL_NEW_LINE,
         { 150, defaultHeight },
         { -defaultPadding, defaultPadding, LV_ALIGN_TOP_RIGHT },
-        homeScreen,
+        mainMenuScreen,
         { &leftBorder }
     );
 
@@ -339,7 +370,7 @@ int main()
         LV_SYMBOL_NEW_LINE,
         { 150, defaultHeight },
         { -defaultPadding, defaultPadding, LV_ALIGN_TOP_RIGHT },
-        homeScreen,
+        mainMenuScreen,
         { &leftBorder }
     );
 
@@ -377,7 +408,7 @@ int main()
         LV_SYMBOL_NEW_LINE,
         { 150, defaultHeight },
         { -defaultPadding, defaultPadding, LV_ALIGN_TOP_RIGHT },
-        homeScreen,
+        mainMenuScreen,
         { &leftBorder }
     );
 
@@ -404,7 +435,7 @@ int main()
         LV_SYMBOL_NEW_LINE,
         { 150, defaultHeight },
         { -6 * defaultPadding, 70, LV_ALIGN_TOP_RIGHT },
-        homeScreen,
+        mainMenuScreen,
         { &leftBorder }
     );
 
@@ -433,7 +464,7 @@ int main()
     lv_chart_set_next_value2(mapChart, greenMapSeries, -1200, 1200);
 
     // Load starting screen.
-    lv_scr_load(homeScreen);
+    lv_scr_load(loadingScreen);
 
 
     //lv_demo_widgets();

@@ -3813,6 +3813,7 @@
     <None Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\tests\unity\yaml_helper.rb" />
     <None Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\zephyr\Kconfig" />
     <None Include="$(MSBuildThisFileDirectory)..\LvglPlatform\lvgl\zephyr\module.yml" />
+    <None Include="..\..\..\..\Desktop\atum-logo.bin" />
     <None Include="freetype.props" />
   </ItemGroup>
   <Import Sdk="Mile.Project.Configurations" Version="1.0.1426" Project="Mile.Project.Cpp.targets" />

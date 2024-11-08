@@ -10,9 +10,33 @@
 #include <iostream>
 class GUI {
 public:
-    // Commonly used dimensions/lengths.
     static const int screenWidth;
     static const int screenHeight;
+
+    static void startLoading() {
+        // Initialization. 
+        createScreens();
+        initializeStyles();
+
+        // Screen setup.
+        loadingScreenSetup();
+        homeScreenSetup();
+        mainMenuScreenSetup();
+        routinesScreenSetup();
+        loggerScreenSetup();
+        graphScreenSetup();
+        mapScreenSetup();
+
+        // Go to the loading screen until given signal robot is good to go. 
+        lv_scr_load(loadingScreen);
+    }
+
+    static void finishLoading() {
+        lv_scr_load(homeScreen);
+    }
+
+private:
+    // Commonly used dimensions/lengths.
     static const int bgBorderWidth;
     static const int workingWidth;
     static const int workingHeight;
@@ -205,31 +229,9 @@ public:
         lv_obj_add_style(mapScreen, &styleBG, 0);
     }
 
-    static void startLoading() {
-        // Initialization. 
-        createScreens();
-        initializeStyles();
-
-        // Screen setup.
-        loadingScreenSetup();
-        homeScreenSetup();
-        mainMenuScreenSetup();
-        routinesScreenSetup();
-        loggerScreenSetup();
-        graphScreenSetup();
-        mapScreenSetup();
-
-        // Go to the loading screen until given signal robot is good to go. 
-        lv_scr_load(loadingScreen);
-    }
-
-    static void finishLoading() {
-        lv_scr_load(homeScreen);
-    }
-
     static void loadingScreenSetup() {
         lv_obj_t* loadingLabel{ lv_label_create(loadingScreen) };
-        lv_label_set_text(loadingLabel, "LOADING!   DO NOT TOUCH!\nDO NOT TOUCH!   LOADING!\nLOADING!   DO NOT TOUCH!\nDO NOT TOUCH!   LOADING!\nLOADING!   DO NOT TOUCH!\nDO NOT TOUCH!   LOADING!\n");
+        lv_label_set_text(loadingLabel, "LOADING!   DO NOT TOUCH!");
         lv_obj_center(loadingLabel);
         lv_obj_set_width(loadingLabel, screenWidth);
         lv_label_set_long_mode(loadingLabel, LV_LABEL_LONG_SCROLL_CIRCULAR);

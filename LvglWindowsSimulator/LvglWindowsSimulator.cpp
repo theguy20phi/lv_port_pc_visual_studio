@@ -16,6 +16,7 @@ enum class MatchColor {
 
 class GUI {
 public:
+    // These can be moved to private later...
     static const int screenWidth;
     static const int screenHeight;
 
@@ -29,7 +30,7 @@ public:
         homeScreenSetup();
         mainMenuScreenSetup();
         routinesScreenSetup(routines);
-        loggerScreenSetup();
+        logScreenSetup();
         graphScreenSetup();
         mapScreenSetup();
 
@@ -49,6 +50,18 @@ public:
         return static_cast<MatchColor>(lv_obj_has_state(colorSwitch, LV_STATE_CHECKED));
     }
 
+    static void writeToLog(const std::string& msg) {
+        if (!lv_obj_has_state(logSwitch, LV_STATE_CHECKED))
+            return;
+        if (logLines >= maxLogLines)
+            logText.erase(0, logText.find('\n') + 1);
+        else
+            logLines++;
+        std::cout << logLines << '\n';
+        logText += msg + '\n';
+        lv_textarea_set_text(logTextArea, logText.c_str());
+    }
+
 private:
     // Commonly used dimensions/lengths.
     static const int bgBorderWidth;
@@ -59,6 +72,7 @@ private:
     static const int fillWidth;
     static const int fillHeight;
     static const int contentYOffset;
+    static const std::size_t maxLogLines;
 
     // Commonly used colors.
     static const lv_color_t black;
@@ -89,14 +103,16 @@ private:
     static lv_obj_t* logScreen;
     static lv_obj_t* graphScreen;
     static lv_obj_t* mapScreen;
-    static lv_obj_t* logSwitch;
-    static lv_obj_t* logTextArea;
 
     // Important objects. 
     static lv_obj_t* routineSelections;
     static lv_obj_t* colorSwitch;
+    static lv_obj_t* logTextArea;
+    static lv_obj_t* logSwitch;
 
-
+    // Other members.
+    static std::string logText;
+    static std::size_t logLines;
 
     struct GUISize {
         const int width;
@@ -347,7 +363,7 @@ private:
         lv_obj_set_style_bg_color(colorSwitch, blue, LV_PART_INDICATOR | LV_STATE_CHECKED);
     }
 
-    static void loggerScreenSetup() {
+    static void logScreenSetup() {
         createLabel(logScreen, "LOG", { 250, defaultHeight }, { defaultPadding, defaultPadding }, { &rightBorder, &styleTitle });
 
         createScreenChangeButton(logScreen,
@@ -483,6 +499,7 @@ lv_style_t GUI::styleTitle;
 lv_style_t GUI::styleDropDownIdle;
 lv_style_t GUI::styleDropDownPressed;
 lv_style_t GUI::styleChart;
+const std::size_t GUI::maxLogLines{ 100000000 };
 
 // Screens.
 lv_obj_t* GUI::loadingScreen;
@@ -492,12 +509,16 @@ lv_obj_t* GUI::routinesScreen;
 lv_obj_t* GUI::logScreen;
 lv_obj_t* GUI::graphScreen;
 lv_obj_t* GUI::mapScreen;
-lv_obj_t* GUI::logSwitch;
-lv_obj_t* GUI::logTextArea;
 
 // Important objects
 lv_obj_t* GUI::routineSelections;
 lv_obj_t* GUI::colorSwitch;
+lv_obj_t* GUI::logTextArea;
+lv_obj_t* GUI::logSwitch;
+
+// Other members.
+std::string GUI::logText;
+std::size_t GUI::logLines;
 
 int main()
 {
@@ -587,7 +608,7 @@ int main()
     //lv_demo_widgets();
     //lv_demo_benchmark();
 
-    int loadingTime{ 4000 };
+    int loadingTime{ 1000 };
     int elapsedTime{ 0 };
     bool finishedLoading{ false };
     while (1)
@@ -598,7 +619,9 @@ int main()
             GUI::finishLoading();
             finishedLoading = true;
         }
-        std::cout << GUI::getRoutineIndex() << ' ' << static_cast<std::size_t>(GUI::getMatchColor()) << '\n';
+        std::string msg{ std::to_string(GUI::getRoutineIndex()) + ' ' + std::to_string(static_cast<std::size_t>(GUI::getMatchColor())) };
+        std::cout << msg << '\n';
+        GUI::writeToLog(msg);
         lv_delay_ms(time_till_next);
     }
 

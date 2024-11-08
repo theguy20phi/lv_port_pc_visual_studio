@@ -8,12 +8,18 @@
 #include <string>
 #include <vector>
 #include <iostream>
+
+enum class MatchColor {
+    Red,
+    Blue
+};
+
 class GUI {
 public:
     static const int screenWidth;
     static const int screenHeight;
 
-    static void startLoading() {
+    static void startLoading(const std::string& routines) {
         // Initialization. 
         createScreens();
         initializeStyles();
@@ -22,7 +28,7 @@ public:
         loadingScreenSetup();
         homeScreenSetup();
         mainMenuScreenSetup();
-        routinesScreenSetup();
+        routinesScreenSetup(routines);
         loggerScreenSetup();
         graphScreenSetup();
         mapScreenSetup();
@@ -33,6 +39,14 @@ public:
 
     static void finishLoading() {
         lv_scr_load(homeScreen);
+    }
+
+    static std::size_t getRoutineIndex() {
+        return lv_dropdown_get_selected(routineSelections);
+    }
+
+    static MatchColor getMatchColor() {
+        return static_cast<MatchColor>(lv_obj_has_state(colorSwitch, LV_STATE_CHECKED));
     }
 
 private:
@@ -77,6 +91,11 @@ private:
     static lv_obj_t* mapScreen;
     static lv_obj_t* logSwitch;
     static lv_obj_t* logTextArea;
+
+    // Important objects. 
+    static lv_obj_t* routineSelections;
+    static lv_obj_t* colorSwitch;
+
 
 
     struct GUISize {
@@ -295,7 +314,7 @@ private:
         );
     }
 
-    static void routinesScreenSetup() {
+    static void routinesScreenSetup(const std::string routines) {
         createLabel(routinesScreen, "ROUTINES", { 250, defaultHeight }, { defaultPadding, defaultPadding }, { &rightBorder, &styleTitle });
 
         createScreenChangeButton(routinesScreen,
@@ -306,17 +325,8 @@ private:
             { &leftBorder }
         );
 
-        lv_obj_t* routineSelections{ lv_dropdown_create(routinesScreen) };
-        lv_dropdown_set_options(routineSelections,
-            "None\n"
-            "Simple Left\n"
-            "Simple Right\n"
-            "WP Left\n"
-            "WP Right\n"
-            "Defensive Left\n"
-            "Defensive Right\n"
-            "Offensive Left"
-        );
+        routineSelections = lv_dropdown_create(routinesScreen);
+        lv_dropdown_set_options(routineSelections, routines.c_str());
         lv_dropdown_add_option(routineSelections, "Placeholder", LV_DROPDOWN_POS_LAST);
         lv_dropdown_add_option(routineSelections, "Testing", LV_DROPDOWN_POS_LAST);
         lv_obj_align(routineSelections, LV_ALIGN_TOP_MID, 0, contentYOffset);
@@ -329,7 +339,7 @@ private:
         lv_obj_add_style(routineSelectionsList, &styleDropDownPressed, LV_PART_SELECTED | LV_STATE_PRESSED);
         lv_obj_set_style_bg_color(routineSelectionsList, darkGrey, LV_PART_SELECTED | LV_STATE_CHECKED);
 
-        lv_obj_t* colorSwitch{ lv_switch_create(routinesScreen) };
+        colorSwitch = lv_switch_create(routinesScreen);
         lv_obj_set_size(colorSwitch, fillWidth, 3 * defaultHeight);
         lv_obj_align(colorSwitch, LV_ALIGN_BOTTOM_MID, 0, -defaultPadding);
         lv_obj_set_style_bg_color(colorSwitch, red, LV_STATE_DEFAULT);
@@ -485,6 +495,10 @@ lv_obj_t* GUI::mapScreen;
 lv_obj_t* GUI::logSwitch;
 lv_obj_t* GUI::logTextArea;
 
+// Important objects
+lv_obj_t* GUI::routineSelections;
+lv_obj_t* GUI::colorSwitch;
+
 int main()
 {
     lv_init();
@@ -556,8 +570,19 @@ int main()
         return -1;
     }
 
+    const std::string routines{
+        "None\n"
+        "Simple Left\n"
+        "Simple Right\n"
+        "WP Left\n"
+        "WP Right\n"
+        "Defensive Left\n"
+        "Defensive Right\n"
+        "Offensive Left"
+    };
+
     // Start GUI.
-    GUI::startLoading();
+    GUI::startLoading(routines);
 
     //lv_demo_widgets();
     //lv_demo_benchmark();
@@ -573,6 +598,7 @@ int main()
             GUI::finishLoading();
             finishedLoading = true;
         }
+        std::cout << GUI::getRoutineIndex() << ' ' << static_cast<std::size_t>(GUI::getMatchColor()) << '\n';
         lv_delay_ms(time_till_next);
     }
 

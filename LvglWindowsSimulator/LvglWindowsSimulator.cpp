@@ -7,6 +7,7 @@
 #include "lvgl/demos/lv_demos.h"
 #include <string>
 #include <vector>
+#include <array>
 #include <iostream>
 
 enum class MatchColor {
@@ -38,6 +39,12 @@ public:
         lv_scr_load(loadingScreen);
     }
 
+    enum SeriesColor {
+        Red,
+        Green,
+        Blue
+    };
+
     static void finishLoading() {
         lv_scr_load(homeScreen);
     }
@@ -62,6 +69,18 @@ public:
         lv_textarea_set_text(logTextArea, logText.c_str());
     }
 
+    static void addGraphPoint(const double point, const SeriesColor seriesColor) {
+        lv_chart_series_t* series{ graphSeries[seriesColor] };
+        const double seriesRange{ graphSeriesRanges[seriesColor] };
+        const int adjustedPoint{ static_cast<int>(point / seriesRange * graphRange) };
+        lv_chart_set_next_value(graphChart, series, adjustedPoint);
+        lv_chart_refresh(graphChart);
+    }
+
+    static void setGraphSeriesRange(const double range, const SeriesColor seriesColor) {
+        graphSeriesRanges[seriesColor] = range;
+    }
+
 private:
     // Commonly used dimensions/lengths.
     static const int bgBorderWidth;
@@ -73,6 +92,8 @@ private:
     static const int fillHeight;
     static const int contentYOffset;
     static const std::size_t maxLogLines;
+    static const int graphRange;
+    static const int mapRange;
 
     // Commonly used colors.
     static const lv_color_t black;
@@ -109,10 +130,16 @@ private:
     static lv_obj_t* colorSwitch;
     static lv_obj_t* logTextArea;
     static lv_obj_t* logSwitch;
+    static lv_obj_t* graphChart;
+    static std::array<lv_chart_series_t*, 3> graphSeries;
+    static std::array<double, 3> graphSeriesRanges;
+    static lv_obj_t* mapChart;
+    static std::array<lv_chart_series_t*, 3> mapSeries;
 
     // Other members.
     static std::string logText;
     static std::size_t logLines;
+    static 
 
     struct GUISize {
         const int width;
@@ -182,7 +209,6 @@ private:
     }
 
     static void initializeStyles() {
-
         // Background style.
         lv_style_init(&styleBG);
         lv_style_set_bg_color(&styleBG, grey);
@@ -412,20 +438,18 @@ private:
             { &leftBorder }
         );
 
-        lv_obj_t* graphChart{ lv_chart_create(graphScreen) };
+        graphChart = lv_chart_create(graphScreen);
         lv_chart_set_type(graphChart, LV_CHART_TYPE_LINE);
         lv_obj_set_size(graphChart, fillWidth, fillHeight);
         lv_obj_align(graphChart, LV_ALIGN_TOP_MID, 0, contentYOffset);
-        lv_chart_set_range(graphChart, LV_CHART_AXIS_PRIMARY_Y, -10000, 10000);
+        lv_chart_set_range(graphChart, LV_CHART_AXIS_PRIMARY_Y, -graphRange, graphRange);
         lv_chart_set_div_line_count(graphChart, 9, 18);
         lv_obj_add_style(graphChart, &styleChart, LV_PART_MAIN | LV_STATE_DEFAULT);
+        lv_chart_set_point_count(graphChart, 1000);
 
-        lv_chart_series_t* redGraphSeries{ lv_chart_add_series(graphChart, red, LV_CHART_AXIS_PRIMARY_Y) };
-        lv_chart_set_next_value(graphChart, redGraphSeries, 2000);
-        lv_chart_set_next_value(graphChart, redGraphSeries, 4000);
-        lv_chart_set_next_value(graphChart, redGraphSeries, 6000);
-        lv_chart_set_next_value(graphChart, redGraphSeries, 8000);
-        lv_chart_set_next_value(graphChart, redGraphSeries, 10000);
+        graphSeries[SeriesColor::Red] = lv_chart_add_series(graphChart, red, LV_CHART_AXIS_PRIMARY_Y);
+        graphSeries[SeriesColor::Green] = lv_chart_add_series(graphChart, green, LV_CHART_AXIS_PRIMARY_Y);
+        graphSeries[SeriesColor::Blue] = lv_chart_add_series(graphChart, blue, LV_CHART_AXIS_PRIMARY_Y);
     }
 
     static void mapScreenSetup() {
@@ -445,24 +469,15 @@ private:
         static const int mapChartSize{ screenHeight - 4 * defaultPadding };
         lv_obj_set_size(mapChart, mapChartSize, mapChartSize);
         lv_obj_align(mapChart, LV_ALIGN_TOP_LEFT, 6 * defaultPadding, defaultPadding);
-        lv_chart_set_range(mapChart, LV_CHART_AXIS_PRIMARY_X, -12000, 12000);
-        lv_chart_set_range(mapChart, LV_CHART_AXIS_PRIMARY_Y, -12000, 12000);
+        lv_chart_set_range(mapChart, LV_CHART_AXIS_PRIMARY_X, -mapRange, mapRange);
+        lv_chart_set_range(mapChart, LV_CHART_AXIS_PRIMARY_Y, -mapRange, mapRange);
         lv_chart_set_div_line_count(mapChart, 9, 9);
         lv_obj_set_style_line_width(mapChart, 0, LV_PART_ITEMS);
         lv_obj_add_style(mapChart, &styleChart, LV_PART_MAIN | LV_STATE_DEFAULT);
 
-        lv_chart_series_t* redMapSeries{ lv_chart_add_series(mapChart, red, LV_CHART_AXIS_PRIMARY_Y) };
-        lv_chart_set_next_value2(mapChart, redMapSeries, 3000, 3000);
-        lv_chart_set_next_value2(mapChart, redMapSeries, 6000, 6000);
-        lv_chart_set_next_value2(mapChart, redMapSeries, 9000, 9000);
-        lv_chart_set_next_value2(mapChart, redMapSeries, 12000, 12000);
-
-
-        lv_chart_series_t* greenMapSeries{ lv_chart_add_series(mapChart, green, LV_CHART_AXIS_PRIMARY_Y) };
-        lv_chart_set_next_value2(mapChart, greenMapSeries, -3000, 3000);
-        lv_chart_set_next_value2(mapChart, greenMapSeries, -6000, 6000);
-        lv_chart_set_next_value2(mapChart, greenMapSeries, -9000, 9000);
-        lv_chart_set_next_value2(mapChart, greenMapSeries, -12000, 12000);
+        mapSeries[SeriesColor::Red] = lv_chart_add_series(mapChart, red, LV_CHART_AXIS_PRIMARY_Y);
+        mapSeries[SeriesColor::Green] = lv_chart_add_series(mapChart, green, LV_CHART_AXIS_PRIMARY_Y);
+        mapSeries[SeriesColor::Blue] = lv_chart_add_series(mapChart, blue, LV_CHART_AXIS_PRIMARY_Y);
     }
 };
 
@@ -477,6 +492,8 @@ const int GUI::defaultPadding{ bgBorderWidth };
 const int GUI::fillWidth{ workingWidth - 4 * defaultPadding };
 const int GUI::fillHeight{ workingHeight - defaultHeight - 4 * defaultPadding };
 const int GUI::contentYOffset{ defaultHeight + 2 * defaultPadding };
+const int GUI::graphRange{ 10000 };
+const int GUI::mapRange{ 12000 };
 
 // Commonly used colors.
 const lv_color_t GUI::black{ lv_color_hex(0x1f1f1f) };
@@ -499,7 +516,7 @@ lv_style_t GUI::styleTitle;
 lv_style_t GUI::styleDropDownIdle;
 lv_style_t GUI::styleDropDownPressed;
 lv_style_t GUI::styleChart;
-const std::size_t GUI::maxLogLines{ 100000000 };
+const std::size_t GUI::maxLogLines{ 25 };
 
 // Screens.
 lv_obj_t* GUI::loadingScreen;
@@ -515,6 +532,11 @@ lv_obj_t* GUI::routineSelections;
 lv_obj_t* GUI::colorSwitch;
 lv_obj_t* GUI::logTextArea;
 lv_obj_t* GUI::logSwitch;
+lv_obj_t* GUI::graphChart;
+std::array<lv_chart_series_t*, 3> GUI::graphSeries;
+std::array<double, 3> GUI::graphSeriesRanges{ graphRange, graphRange, graphRange };
+lv_obj_t* GUI::mapChart;
+std::array<lv_chart_series_t*, 3> GUI::mapSeries;
 
 // Other members.
 std::string GUI::logText;
@@ -611,6 +633,9 @@ int main()
     int loadingTime{ 1000 };
     int elapsedTime{ 0 };
     bool finishedLoading{ false };
+    GUI::setGraphSeriesRange(1.0, GUI::SeriesColor::Red);
+    GUI::setGraphSeriesRange(1.0, GUI::SeriesColor::Green);
+    GUI::setGraphSeriesRange(1.0, GUI::SeriesColor::Blue);
     while (1)
     {
         uint32_t time_till_next = lv_timer_handler();
@@ -619,9 +644,9 @@ int main()
             GUI::finishLoading();
             finishedLoading = true;
         }
-        std::string msg{ std::to_string(GUI::getRoutineIndex()) + ' ' + std::to_string(static_cast<std::size_t>(GUI::getMatchColor())) };
-        std::cout << msg << '\n';
-        GUI::writeToLog(msg);
+        GUI::addGraphPoint(sin(0.01 * elapsedTime), GUI::SeriesColor::Red);
+        GUI::addGraphPoint(cos(0.01 * elapsedTime), GUI::SeriesColor::Green);
+        GUI::addGraphPoint(sin(0.01 * elapsedTime + 3.14159265), GUI::SeriesColor::Blue);
         lv_delay_ms(time_till_next);
     }
 

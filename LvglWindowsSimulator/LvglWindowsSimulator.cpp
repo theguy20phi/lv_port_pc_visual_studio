@@ -81,6 +81,30 @@ public:
         graphSeriesRanges[seriesColor] = range;
     }
 
+    static void clearGraphSeries(const SeriesColor seriesColor) {
+        lv_chart_series_t* series{ graphSeries[seriesColor] };
+        lv_chart_set_all_value(graphChart, series, LV_CHART_POINT_NONE);
+    }
+
+    static void addMapPoints(const std::vector<std::pair<int, int>>& points, const SeriesColor seriesColor) {
+        lv_chart_series_t* series{ mapSeries[seriesColor] };
+        for(std::pair<int, int> point : points)
+            lv_chart_set_next_value2(mapChart, series, point.first, point.second);
+        lv_chart_set_next_value2(mapChart, series, points.back().first, points.back().second);
+        lv_chart_refresh(mapChart);
+    }
+
+    static void addMapPoint(const std::pair<int, int> point, const SeriesColor seriesColor) {
+        lv_chart_series_t* series{ mapSeries[seriesColor] };
+        lv_chart_set_next_value2(mapChart, series, point.first, point.second);
+        lv_chart_refresh(mapChart);
+    }
+
+    static void clearMapSeries(const SeriesColor seriesColor) {
+        lv_chart_series_t* series{ mapSeries[seriesColor] };
+        lv_chart_set_all_value(mapChart, series, LV_CHART_POINT_NONE);
+    }
+
 private:
     // Commonly used dimensions/lengths.
     static const int bgBorderWidth;
@@ -139,7 +163,6 @@ private:
     // Other members.
     static std::string logText;
     static std::size_t logLines;
-    static 
 
     struct GUISize {
         const int width;
@@ -464,7 +487,7 @@ private:
             { &leftBorder }
         );
 
-        lv_obj_t* mapChart{ lv_chart_create(mapScreen) };
+        mapChart = lv_chart_create(mapScreen);
         lv_chart_set_type(mapChart, LV_CHART_TYPE_SCATTER);
         static const int mapChartSize{ screenHeight - 4 * defaultPadding };
         lv_obj_set_size(mapChart, mapChartSize, mapChartSize);
@@ -636,6 +659,7 @@ int main()
     GUI::setGraphSeriesRange(1.0, GUI::SeriesColor::Red);
     GUI::setGraphSeriesRange(1.0, GUI::SeriesColor::Green);
     GUI::setGraphSeriesRange(1.0, GUI::SeriesColor::Blue);
+    GUI::addMapPoints({ {0, 0}, {1000, 1000}, {2000, 3000}, {3000, -5000}, {0, 1000} }, GUI::SeriesColor::Blue);
     while (1)
     {
         uint32_t time_till_next = lv_timer_handler();
@@ -644,9 +668,16 @@ int main()
             GUI::finishLoading();
             finishedLoading = true;
         }
-        GUI::addGraphPoint(sin(0.01 * elapsedTime), GUI::SeriesColor::Red);
-        GUI::addGraphPoint(cos(0.01 * elapsedTime), GUI::SeriesColor::Green);
-        GUI::addGraphPoint(sin(0.01 * elapsedTime + 3.14159265), GUI::SeriesColor::Blue);
+        const double x{ sin(0.01 * elapsedTime) };
+        const double y{ cos(0.01 * elapsedTime) };
+        const double z{ sin(0.01 * elapsedTime + 3.14159265) };
+        GUI::addGraphPoint(x, GUI::SeriesColor::Red);
+        GUI::addGraphPoint(y, GUI::SeriesColor::Green);
+        GUI::addGraphPoint(z, GUI::SeriesColor::Blue);
+        GUI::addMapPoint({ 6000 * x, 3000 + 6000 * y }, GUI::SeriesColor::Red);
+        GUI::addMapPoint({ 3000 + 6000 * x, -3000 + 6000 * y }, GUI::SeriesColor::Green);
+        if (elapsedTime >= 10000)
+            GUI::clearMapSeries(GUI::SeriesColor::Blue);
         lv_delay_ms(time_till_next);
     }
 
